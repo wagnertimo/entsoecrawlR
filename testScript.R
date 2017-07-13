@@ -4,12 +4,15 @@
 
 library(entsoecrawlR)
 
-setLogging(FALSE)
+setLogging(TRUE)
 
 
-getData("DA","DE")
+sdate = "2015-04-01"
+edate = "2017-05-31"
 
 
+data <- getLoadDayAheadVsActual(sdate, edate)
 
+head(data)
 
 

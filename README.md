@@ -6,7 +6,7 @@
 This R package provides functions to crawl energy system data of the European Network of Transmission System Operators (ENTSO-E) at https://transparency.entsoe.eu.
 It is build as part of my master thesis to analyze the call durations of secondary control reserve (SCR) depending on the offered energy price. 
 The aim is to forecast such call durations to improve existing energy management optimization algorithms which relay on assumptions and are not very accurate.
-For further information please get in contact or follow my (blog)[https://wagnertimo.github.io].
+For further information please get in contact or follow my blog (https://wagnertimo.github.io).
 
 ## Get Started
 
@@ -38,9 +38,39 @@ Before using this R package, please check that you have installed the following 
 ### Usage
 
 
+**Total Load - Day Ahead / Actual**: The function `getLoadDayAheadVsActual()` is implemented to retrieve the actual and forecasted total loads of each TSO and their common load values of the Netzregelverbund. The values are in MW in a resolution of 15 minutes. The code snippet below gives an example to get started. It is important to not forget activating the library and setting logging off or on.
+
+```{r}
+# Activate the library
+library(entsoecrawlR)
+
+# Set logging. Creates also a loggin file in the workspace. Forgetting to set a value will break the codes.
+setLogging(TRUE)
+
+# Retrieve the Load data for 2015-04-01 to 2017-05-31
+loadData <- getLoadDayAheadVsActual("2015-04-01", "2017-05-31")
+
+head(loadData)
+# Output:
+#              DateTime ForecastLoad_50Hz ActualLoad_50Hz ForecastLoad_Amprion ActualLoad_Amprion ForecastLoad_TenneT ActualLoad_TenneT
+# 1 2015-04-01 00:00:00              7316            9007                20273              20847               15415             17660
+# 2 2015-04-01 00:15:00              7519            8832                19777              20149               16736             17371
+# 3 2015-04-01 00:30:00              7390            8232                19485              20112               16756             16841
+# 4 2015-04-01 00:45:00              7301            7865                19247              19753               16492             16373
+# 5 2015-04-01 01:00:00              7161            7840                19019              19706               16320             16322
+# 6 2015-04-01 01:15:00              7100            7754                18870              19418               16146             15947
+#   ForecastLoad_TransnetBW ActualLoad_TransnetBW ForecastLoad_Netzregelverbund Actuaload_Netzregelverbund
+# 1                    6685                  6786                         49689                      54300
+# 2                    6589                  6712                         50621                      53064
+# 3                    6463                  6457                         50094                      51642
+# 4                    6261                  6344                         49301                      50335
+# 5                    6197                  6167                         48697                      50035
+# 6                    6071                  6135                         48187                      49254
+
+```
 
 
 
+## Notes
 
-
-
+> Data for the energy loads (day-ahead forecast and actual loads) are only retrievable since 2015-01-01.
