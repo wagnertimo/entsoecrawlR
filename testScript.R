@@ -11,8 +11,8 @@ sdate = "2015-04-01"
 edate = "2017-05-31"
 
 
-data <- getLoadDayAheadVsActual(sdate, edate)
+d <- getLoadDayAheadVsActual(sdate, edate)
 
-head(data)
+head(d)
 
 

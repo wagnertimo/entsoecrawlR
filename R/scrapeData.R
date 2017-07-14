@@ -220,7 +220,7 @@ getLoadDataForTSO <- function(startDate, endDate, t){
   res[,3] <- as.numeric(res[,3]) # Actual Load
 
   l <- strsplit(res$DateTime, " - ")
-  f <- function(x) x[2]
+  f <- function(x) x[1]
 
   res$DateTime <- as.POSIXct(unlist(lapply(l, f)), "%d.%m.%Y %H:%M", tz = "Europe/Berlin")
 
