@@ -16,3 +16,22 @@ d <- getLoadDayAheadVsActual(sdate, edate)
 head(d)
 
 
+sdate = "2015-04-01"
+edate = "2017-05-31"
+
+data <- getWindSolarDayAheadGeneration(sdate, edate)
+
+str(data)
+
+
+sdate = "2017-01-01"
+edate = "2017-01-01"
+
+data2 <- getActualGeneration(sdate, edate)
+
+
+
+
+
+
+

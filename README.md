@@ -38,7 +38,7 @@ Before using this R package, please check that you have installed the following 
 ### Usage
 
 
-**Total Load - Day Ahead / Actual**: The function `getLoadDayAheadVsActual()` is implemented to retrieve the actual and forecasted total loads of each TSO and their common load values of the Netzregelverbund. The values are in MW in a resolution of 15 minutes where the timestamp represents the start of the quarter hour. The code snippet below gives an example. It is important not forgetting to activate the library and set logging off or on.
+**Total Load - Day Ahead / Actual**: The function `getLoadDayAheadVsActual()` is implemented to retrieve the actual and forecasted total loads of each TSO and their common load values of the Netzregelverbund (source: https://transparency.entsoe.eu/load-domain/r2/totalLoadR2/show). The values are in MW in a resolution of 15 minutes where the timestamp represents the start of the quarter hour. The data is returned by days. If you only want minutes within the day, pplease subset the data yourself. The code snippet below gives an example. It is important not forgetting to activate the library and set logging off or on.
 
 ```{r}
 # Activate the library
@@ -71,6 +71,81 @@ head(loadData)
 
 
 
+
+**Generation Forecasts - Day Ahead for Wind and Solar**: The function `getWindSolarDayAheadGeneration()` is implemented to retrieve the forecasted Wind (Onshore, Offshore) and Solar generation of each TSO and their common generation energy of the Netzregelverbund (source: https://transparency.entsoe.eu/generation/r2/dayAheadGenerationForecastWindAndSolar/show). The values are in MW in a resolution of 15 minutes where the timestamp represents the start of the quarter hour. The data is returned by days. If you only want minutes within the day, pplease subset the data yourself. The code snippet below gives an example. It is important not forgetting to activate the library and set logging off or on.
+
+```{r}
+# Activate the library
+library(entsoecrawlR)
+
+# Set logging. Creates also a loggin file in the workspace. Forgetting to set a value will break the codes.
+setLogging(TRUE)
+
+# Retrieve the forecasted Wind and Solar generation data for 2015-04-01 to 2017-05-31
+windSolarData <- getWindSolarDayAheadGeneration("2015-04-01", "2017-05-31")
+
+str(windSolarData)
+# Output:
+# 'data.frame':	96 obs. of  21 variables:
+#  $ DateTime                                         : POSIXct, format: "2017-01-01 00:00:00" ...
+#  $ Sum_Generation_Forecast50Hz                      : num  5253 5221 5190 5164 5139 ...
+#  $ Solar_Generation_Forecast_50Hz                   : num  0 0 0 0 0 0 0 0 0 0 ...
+#  $ WindOffshore_Generation_Forecast_50Hz            : num  331 331 331 331 331 331 331 331 331 331 ...
+#  $ WindOnshore_Generation_Forecast_50Hz             : num  4922 4890 4859 4833 4808 ...
+#  $ Sum_Generation_ForecastAmprion                   : num  1366 1369 1375 1380 1383 ...
+#  $ Solar_Generation_Forecast_Amprion                : num  0 0 0 0 0 0 0 0 0 0 ...
+#  $ WindOffshore_Generation_Forecast_Amprion         : num  0 0 0 0 0 0 0 0 0 0 ...
+#  $ WindOnshore_Generation_Forecast_Amprion          : num  1366 1369 1375 1380 1383 ...
+#  $ Sum_Generation_ForecastTenneT                    : num  9645 9621 9603 9580 9117 ...
+#  $ Solar_Generation_Forecast_TenneT                 : num  0 0 0 0 0 0 0 0 0 0 ...
+#  $ WindOffshore_Generation_Forecast_TenneT          : num  3009 3007 3008 3008 3039 ...
+#  $ WindOnshore_Generation_Forecast_TenneT           : num  6636 6614 6595 6572 6078 ...
+#  $ Sum_Generation_ForecastTransnetBW                : num  42 43 44 45 46 48 50 52 55 59 ...
+#  $ Solar_Generation_Forecast_TransnetBW             : num  0 0 0 0 0 0 0 0 0 0 ...
+#  $ WindOffshore_Generation_Forecast_TransnetBW      : num  NA NA NA NA NA NA NA NA NA NA ...
+#  $ WindOnshore_Generation_Forecast_TransnetBW       : num  42 43 44 45 46 48 50 52 55 59 ...
+#  $ WindOffshore_Generation_Forecast_Netzregelverbund: int  0 0 0 0 0 0 0 0 0 0 ...
+#  $ WindOnshore_Generation_Forecast_Netzregelverbund : int  0 0 0 0 0 0 0 0 0 0 ...
+#  $ Solar_Generation_Forecast_Netzregelverbund       : num  0 0 0 0 0 0 0 0 0 0 ...
+#  $ Sum_Generation_Forecast_Netzregelverbund         : num  16306 16254 16212 16169 15685 ...
+
+```
+
+
+
+
+**Actual Generation per Production Type**: The function `getActualGeneration()` is implemented to retrieve the actual power generation per product type of each TSO and their common generation energy of the Netzregelverbund (source: https://transparency.entsoe.eu/generation/r2/actualGenerationPerProductionType/show). 
+
+The product types are Biomass, Fossil Brown coal/Lignite, Fossil Coal-derived gas, Fossil Gas, Fossil Hard coal, Fossil Oil, Fossil Oil shale, Fossil Peat, Geothermal, Hydro Pumped Storage, Hydro Run-of-river and poundage, Hydro Water Reservoir, Marine, Nuclear, Other, Other renewable, Solar, Waste, Wind Offshore, Wind Onshore. For each product type the aggregated generation and consumption is returned, as well as the total generation over all prodution types for each TSO and the Netzregelverbund.
+
+The values are in MW in a resolution of 15 minutes where the timestamp represents the start of the quarter hour. The data is returned by days. If you only want minutes within the day, pplease subset the data yourself. The code snippet below gives an example. It is important not forgetting to activate the library and set logging off or on.
+
+```{r}
+# Activate the library
+library(entsoecrawlR)
+
+# Set logging. Creates also a loggin file in the workspace. Forgetting to set a value will break the codes.
+setLogging(TRUE)
+
+# Retrieve the actual generation and consumption for each TSO and the Netzregelverbund for 2015-04-01 to 2017-05-31. 208 Variables!
+actualGen <- getActualGeneration("2015-04-01", "2017-05-31")
+
+```
+
+
+
+
+
+
+
+
 ## Notes
 
 > Data for the energy loads (day-ahead forecast and actual loads) are only retrievable since 2015-01-01.
+
+
+
+
+
+
+
