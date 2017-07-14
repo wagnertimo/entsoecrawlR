@@ -135,7 +135,34 @@ actualGen <- getActualGeneration("2015-04-01", "2017-05-31")
 
 
 
+**Generation Forecast - Day ahead**: The function `getForecastGeneration()` is implemented to retrieve the day-ahead forecasted and aggregated power generation of each TSO and their common generation energy of the Netzregelverbund (source: https://transparency.entsoe.eu/generation/r2/dayAheadAggregatedGeneration/show). 
 
+The values are in MW in a resolution of one hour where the timestamp represents the start of the hour. The data is returned by days. If you only want minutes within the day, pplease subset the data yourself. The code snippet below gives an example. It is important not forgetting to activate the library and set logging off or on.
+
+```{r}
+# Activate the library
+library(entsoecrawlR)
+
+# Set logging. Creates also a loggin file in the workspace. Forgetting to set a value will break the codes.
+setLogging(TRUE)
+
+# Retrieve the actual generation and consumption for each TSO and the Netzregelverbund for 2015-04-01 to 2017-05-31. 208 Variables!
+forecastGen <- getForecastGeneration("2015-04-01", "2017-05-31")
+
+head(forecastGen)
+
+# Excerpt of the output:
+#
+#              DateTime Forecast_Generation_50Hz Forecast_Consumption_50Hz Forecast_Generation_Amprion    ....
+# 1 2017-01-01 00:00:00                    11312                        NA                       19583    ....                      
+# 2 2017-01-01 01:00:00                    11057                        NA                       18933    ....                       
+# 3 2017-01-01 02:00:00                    10849                        NA                       18931    ....                       
+# 4 2017-01-01 03:00:00                    10881                        NA                       19045    ....                       
+# 5 2017-01-01 04:00:00                    10204                        NA                       19352    ....                       
+# 6 2017-01-01 05:00:00                     9861                        NA                       19238    ....        
+ 
+
+```
 
 
 

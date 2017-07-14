@@ -483,7 +483,7 @@ getWindSolarDataForTSO <- function(startDate, endDate, t){
 #' @return a data.frame object with the actual power generation per product type of the four german TSO
 #'
 #' @examples
-#' loadData <- getWindSolarDayAheadVsActual("2017-01-01", "2017-06-30")
+#' loadData <- getActualGeneration("2017-01-01", "2017-06-30")
 #'
 #' @export
 #'
@@ -816,7 +816,214 @@ getGenerationDataForTSO <- function(startDate, endDate, t){
 
 
 
+#' @title getForecastGeneration
+#'
+#' @description This method retrieves the forecasted energy generation and consumption for the four german TSO and the Netzregelverbund (summation).
+#' The resolution of the data is in one hour timesteps (CET (UTC+1) / CEST (UTC+2)) and the values are presented in MW.
+#'
+#' NOTE:
+#'  - Always downloads for the whole year and then subsets the data to the given time period (3-4MB). This is done for each TSO
+#'  - For every request a Login POST request is needed. For Login a pseudo account is used.
+#'
+#' @param startDate date format is YYYY-MM-DD Distinguishing of hours or minutes is not allowed. If you e.g. only need half of a day, please subset the data yourself.
+#' @param endDate date format is YYYY-MM-DD Distinguishing of hours or minutes is not allowed. If you e.g. only need half of a day, please subset the data yourself.
+#'
+#' @return a data.frame object with the forecasted power generation and consumption of the four german TSO.
+#'
+#' @examples
+#' loadData <- getForecastGeneration("2017-01-01", "2017-06-30")
+#'
+#' @export
+#'
+getForecastGeneration <- function(startDate, endDate) {
+  library(logging)
+  library(httr)
+  library(XML)
+  library(dplyr)
+  library(lubridate)
 
+
+  # TODO: check if time period exceeds one year --> seperate request into years
+
+  # Setup the logger and handlers
+  basicConfig(level="DEBUG") # parameter level = x, with x = debug(10), info(20), warn(30), critical(40) // setLevel()
+  nameLogFile <- paste("getForecastGeneration", gsub(":", "", as.character(Sys.time())), ".txt", sep="")
+  addHandler(writeToFile, file=nameLogFile, level='DEBUG')
+
+
+
+  res <- list()
+
+  tsos <- c("50Hz", "Amprion", "TenneT", "TransnetBW")
+
+  for(t in 1:length(tsos)) {
+
+    # date format is YYYY-MM-DD
+    d <- getGenerationForecastDataForTSO(startDate, endDate, tsos[t])
+
+    # Only add DateTime column once at the beginning
+    if(t > 1) {
+      res <- c(res, list(d[,2:ncol(d)]))
+    } else {
+      res <- c(res, list(d))
+    }
+
+  }
+
+  res <- as.data.frame(res)
+
+  # Add the sumed loads for the Netzregelverbund
+  res$Forecast_Generation_Netzregelverbund <- res %>% select(starts_with("Generation")) %>% apply(1, sum, na.rm=TRUE)
+  res$Forecast_Consumption_Netzregelverbund <- res %>% select(starts_with("Consuption")) %>% apply(1, sum, na.rm=TRUE)
+
+
+  if(getOption("logging")) logdebug(paste("getForecastGeneration - DONE"))
+
+
+  return(res)
+
+
+
+
+}
+
+# helper function for @seealso getActualGeneration
+# returns the data.frame for a tso
+getGenerationForecastDataForTSO <- function(startDate, endDate, t){
+
+  res <- data.frame()
+
+  # Payload Parameters with example data:
+  #
+  # name	""
+  # defaultValue	"false"
+  # viewType	"TABLE"
+  # areaType	"CTA"
+  # atch	"false"
+  # datepicker-day-offset-select-dv-date-from_input	"D"
+  # dateTime.dateTime	"01.01.2017+00:00|CET|DAYTIMERANGE"
+  # dateTime.endDateTime	"01.01.2017+00:00|CET|DAYTIMERANGE"
+  # area.values	"CTY|10Y1001A1001A83F!CTA|10YDE-VE-------2"
+  # dateTime.timezone	"CET_CEST"
+  # dateTime.timezone_input	"CET+(UTC+1)+/+CEST+(UTC+2)"
+  # dataItem	"ALL"
+  # timeRange	"YEAR" // --> retrieves the data of the year of the given date (not passed days are filled with "-") or "DEFAULT" (--> data of the specified day)
+  # exportType	"CSV"
+
+
+
+  # TSO Codes:
+  # hz = "CTY|10Y1001A1001A83F!CTA|10YDE-VE-------2" # 50Hz
+  # amprion = "CTY|10Y1001A1001A83F!CTA|10YDE-RWENET---I" # Amprion
+  # tennet = "CTY|10Y1001A1001A83F!CTA|10YDE-EON------1" # TenneT
+  # transnet = "CTY|10Y1001A1001A83F!CTA|10YDE-ENBW-----N" # TransnetBW
+  #
+
+  # Set the right TSO Code for the tso in the loop
+  if(t == "50Hz") {
+    tso = "CTY|10Y1001A1001A83F!CTA|10YDE-VE-------2"
+  }
+  else if(t == "Amprion") {
+    tso = "CTY|10Y1001A1001A83F!CTA|10YDE-RWENET---I"
+  }
+  else if(t == "TenneT") {
+    tso = "CTY|10Y1001A1001A83F!CTA|10YDE-EON------1"
+  }
+  else if(t == "TransnetBW") {
+    tso = "CTY|10Y1001A1001A83F!CTA|10YDE-ENBW-----N"
+  }
+
+  if(getOption("logging")) logdebug(paste("getActualGeneration - Get the data for TSO", t))
+
+  # LOGIN with a pseudo account
+  #
+  if(getOption("logging")) logdebug(paste("getActualGeneration - Logging in ..."))
+
+  # Login mail: bipriota@wegwerfemail.info, password: 123123
+  login <- list(
+    username = "bipriota@wegwerfemail.info",
+    password = "123123",
+    submit = "Sign In"
+  )
+
+  # root url + value in input form at atrribute action here: action="/value"
+  # r will never be used again
+  r <- POST("https://transparency.entsoe.eu/login", body = login, encode = "form") # , verbose()
+
+
+  # Once logged in --> get the data
+  # Get the years of the time period --> download by years and then subset
+  dateArray = paste(seq(year(as.Date(sdate)), year(as.Date(edate)), by = 1), "-01-01", sep = "")
+
+  # for each year retrieve the data
+  for(i in 1:length(dateArray)) {
+
+    if(getOption("logging")) logdebug(paste("getActualGeneration - Get the data for year", dateArray[i]))
+
+
+    # Date Code: e.g. "12.07.2017+00:00|CET|DAYTIMERANGE"
+    # "%d.%m.%Y" + "+00:00|CET|DAYTIMERANGE" --> this suffix stays the same
+    #
+    date = paste(format(as.Date(dateArray[i]), "%d.%m.%Y"), "+00:00|CET|DAYTIMERANGE", sep = "")
+
+    # https://transparency.entsoe.eu/generation/r2/dayAheadAggregatedGeneration/export?name=&defaultValue=false&viewType=TABLE&areaType=CTA&atch=false&datepicker-day-offset-select-dv-date-from_input=D&dateTime.dateTime=01.01.2017+00:00|CET|DAYTIMERANGE&dateTime.endDateTime=01.01.2017+00:00|CET|DAYTIMERANGE&area.values=CTY|10Y1001A1001A83F!CTA|10YDE-VE-------2&dateTime.timezone=CET_CEST&dateTime.timezone_input=CET+(UTC+1)+/+CEST+(UTC+2)&dataItem=ALL&timeRange=YEAR&exportType=CSV
+    url = 'https://transparency.entsoe.eu/generation/r2/dayAheadAggregatedGeneration/export?';
+
+    request = paste(
+      'name=', "","&",
+      'defaultValue=', "false","&",
+      'viewType=', 'TABLE',"&",
+      'areaType=', 'CTA',"&",
+      'atch=', "false","&",
+      'datepicker-day-offset-select-dv-date-from_input', "D", "&",
+      'dateTime.dateTime=', date,"&",
+      'dateTime.endDateTime=', date,"&",
+      'area.values=', tso,"&",
+      'dateTime.timezone=', "CET_CEST","&",
+      'dateTime.timezone_input=',"CET+(UTC+1)+/+CEST+(UTC+2)","&",
+      'dataItem=', "ALL","&",
+      'timeRange=', "YEAR","&",
+      'exportType=', "CSV", sep = ""
+    );
+
+    url = paste(url, request, sep = "")
+
+
+    data <- GET(url) # , verbose()
+
+    # Read in the file
+    data <- read.table(text = content(data, "text"), sep = ",",
+                       header = TRUE,
+                       na.strings  = c("-", "", "n/e"),
+                       colClasses = c("character", "character"),
+                       col.names = c("DateTime",
+                                     paste("Forecast_Generation_", t, sep = ""),
+                                     paste("Forecast_Consumption_", t, sep = "")
+                       ))
+
+    res <- rbind(res, data)
+  }
+
+  # Format the data.frame
+
+  # convert characters to numeric values
+  res[,2:ncol(res)] <- lapply(res[,2:ncol(res)], function(x) as.numeric(x))
+
+  # convert DateTime character to POSIXct object
+  l <- strsplit(res$DateTime, " - ")
+  f <- function(x) x[1]
+
+  res$DateTime <- as.POSIXct(unlist(lapply(l, f)), "%d.%m.%Y %H:%M", tz = "Europe/Berlin")
+
+  # # TODO --> subset data to the given time period by day
+  # res <- res %>% filter(date(DateTime) >= date(as.POSIXct(startDate, tz = "Europe/Berlin")) & date(DateTime) <= date(as.POSIXct(endDate, tz = "Europe/Berlin")))
+  res <- res %>% filter(DateTime >= as.POSIXct(paste(startDate, "00:00:00", sep=""), tz = "Europe/Berlin") & DateTime <= as.POSIXct(paste(endDate, "23:59:59", sep=""), tz = "Europe/Berlin"))
+
+
+  return(res)
+
+
+}
 
 
 

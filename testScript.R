@@ -31,6 +31,22 @@ data2 <- getActualGeneration(sdate, edate)
 
 
 
+sdate = "2017-01-01"
+edate = "2017-01-01"
+
+data3 <- getForecastGeneration(sdate, edate)
+
+head(data3)
+
+
+
+
+
+
+
+
+
+
 
 
 
