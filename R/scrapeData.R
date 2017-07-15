@@ -167,7 +167,7 @@ getLoadDataForTSO <- function(startDate, endDate, t){
 
   # Once logged in --> get the data
   # Get the years of the time period --> download by years and then subset
-  dateArray = paste(seq(year(as.Date(sdate)), year(as.Date(edate)), by = 1), "-01-01", sep = "")
+  dateArray = paste(seq(year(as.Date(startDate)), year(as.Date(endDate)), by = 1), "-01-01", sep = "")
 
   # for each year retrieve the data
   for(i in 1:length(dateArray)) {
@@ -380,7 +380,7 @@ getWindSolarDataForTSO <- function(startDate, endDate, t){
 
   # Once logged in --> get the data
   # Get the years of the time period --> download by years and then subset
-  dateArray = paste(seq(year(as.Date(sdate)), year(as.Date(edate)), by = 1), "-01-01", sep = "")
+  dateArray = paste(seq(year(as.Date(startDate)), year(as.Date(endDate)), by = 1), "-01-01", sep = "")
 
   # for each year retrieve the data
   for(i in 1:length(dateArray)) {
@@ -666,7 +666,7 @@ getGenerationDataForTSO <- function(startDate, endDate, t){
 
   # Once logged in --> get the data
   # Get the years of the time period --> download by years and then subset
-  dateArray = paste(seq(year(as.Date(sdate)), year(as.Date(edate)), by = 1), "-01-01", sep = "")
+  dateArray = paste(seq(year(as.Date(startDate)), year(as.Date(endDate)), by = 1), "-01-01", sep = "")
 
   # for each year retrieve the data
   for(i in 1:length(dateArray)) {
@@ -953,7 +953,7 @@ getGenerationForecastDataForTSO <- function(startDate, endDate, t){
 
   # Once logged in --> get the data
   # Get the years of the time period --> download by years and then subset
-  dateArray = paste(seq(year(as.Date(sdate)), year(as.Date(edate)), by = 1), "-01-01", sep = "")
+  dateArray = paste(seq(year(as.Date(startDate)), year(as.Date(endDate)), by = 1), "-01-01", sep = "")
 
   # for each year retrieve the data
   for(i in 1:length(dateArray)) {
