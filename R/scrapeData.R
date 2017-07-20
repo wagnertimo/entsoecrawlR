@@ -241,7 +241,7 @@ getLoadDataForTSO <- function(startDate, endDate, t){
 
 #' @title getWindSolarDayAheadGeneration
 #'
-#' @description This method retrieves the actual and one day-ahead forecast of the energy generation in Wind (Onshore, Offshore) and Solar for the four german TSO and the Netzregelverbund (summation).
+#' @description This method retrieves one day-ahead forecast of the energy generation in Wind (Onshore, Offshore) and Solar for the four german TSO and the Netzregelverbund (summation).
 #' The resolution of the data is in discrete 15 minutes timesteps (CET (UTC+1) / CEST (UTC+2)) and the values are presented in MW.
 #'
 #' NOTE:
@@ -296,8 +296,8 @@ getWindSolarDayAheadGeneration <- function(startDate, endDate) {
   res <- as.data.frame(res)
 
   # Add the sumed loads for the Netzregelverbund
-  res$WindOffshore_Generation_Forecast_Netzregelverbund <- res %>% select(starts_with("Offshore")) %>% apply(1, sum, na.rm=TRUE)
-  res$WindOnshore_Generation_Forecast_Netzregelverbund <- res %>% select(starts_with("Onshore")) %>% apply(1, sum, na.rm=TRUE)
+  res$WindOffshore_Generation_Forecast_Netzregelverbund <- res %>% select(starts_with("WindOffshore")) %>% apply(1, sum, na.rm=TRUE)
+  res$WindOnshore_Generation_Forecast_Netzregelverbund <- res %>% select(starts_with("WindOnshore")) %>% apply(1, sum, na.rm=TRUE)
   res$Solar_Generation_Forecast_Netzregelverbund <- res %>% select(starts_with("Solar")) %>% apply(1, sum, na.rm=TRUE)
   res$Sum_Generation_Forecast_Netzregelverbund <- res %>% select(starts_with("Sum")) %>% apply(1, sum, na.rm=TRUE)
 
@@ -873,8 +873,8 @@ getForecastGeneration <- function(startDate, endDate) {
   res <- as.data.frame(res)
 
   # Add the sumed loads for the Netzregelverbund
-  res$Forecast_Generation_Netzregelverbund <- res %>% select(starts_with("Generation")) %>% apply(1, sum, na.rm=TRUE)
-  res$Forecast_Consumption_Netzregelverbund <- res %>% select(starts_with("Consuption")) %>% apply(1, sum, na.rm=TRUE)
+  res$Forecast_Generation_Netzregelverbund <- res %>% select(starts_with("Forecast_Generation")) %>% apply(1, sum, na.rm=TRUE)
+  res$Forecast_Consumption_Netzregelverbund <- res %>% select(starts_with("Forecast_Consuption")) %>% apply(1, sum, na.rm=TRUE)
 
 
   if(getOption("logging")) logdebug(paste("getForecastGeneration - DONE"))
