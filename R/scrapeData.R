@@ -90,8 +90,18 @@ getLoadDayAheadVsActual <- function(startDate, endDate) {
   res <- as.data.frame(res)
 
   # Add the sumed loads for the Netzregelverbund
-  res$Forecast_Load_Netzregelverbund <- res %>% select(starts_with("Forecast")) %>% apply(1, sum, na.rm=TRUE)
-  res$Actual_Load_Netzregelverbund <- res %>% select(starts_with("Actual")) %>% apply(1, sum, na.rm=TRUE)
+  res$Load_Forecast_Sum_Netzregelverbund <- res %>% select(starts_with("Load_Forecast")) %>% apply(1, sum, na.rm=TRUE)
+  res$Load_Actual_Sum_Netzregelverbund <- res %>% select(starts_with("Load_Actual")) %>% apply(1, sum, na.rm=TRUE)
+
+  res = res %>% mutate(
+    #  add/compute additional column with Forecast_Err_50Hz (and for all other TSO and Netzregelverbund)
+    Load_Error_Sum_50Hz = Load_Forecast_Sum_50Hz - Load_Actual_Sum_50Hz,
+    Load_Error_Sum_Amprion = Load_Forecast_Sum_Amprion - Load_Actual_Sum_Amprion,
+    Load_Error_Sum_TenneT = Load_Forecast_Sum_TenneT - Load_Actual_Sum_TenneT,
+    Load_Error_Sum_TransnetBW = Load_Forecast_Sum_TransnetBW - Load_Actual_Sum_TransnetBW,
+    Load_Error_Sum_Netzregelverbund = Load_Forecast_Sum_Netzregelverbund - Load_Actual_Sum_Netzregelverbund
+  )
+
 
 
   if(getOption("logging")) logdebug(paste("getLoadDayAheadVsActual - DONE"))
@@ -209,7 +219,7 @@ getLoadDataForTSO <- function(startDate, endDate, t){
                        header = TRUE,
                        na.strings  = "-",
                        colClasses = c("character", "character", "character"),
-                       col.names = c("DateTime", paste("Forecast_Load_", t, sep = ""), paste("Actual_Load_", t, sep = "")))
+                       col.names = c("DateTime", paste("Load_Forecast_Sum_", t, sep = ""), paste("Load_Actual_Sum_", t, sep = "")))
 
     res <- rbind(res, data)
   }
@@ -296,10 +306,10 @@ getWindSolarDayAheadGeneration <- function(startDate, endDate) {
   res <- as.data.frame(res)
 
   # Add the sumed loads for the Netzregelverbund
-  res$WindOffshore_Generation_Forecast_Netzregelverbund <- res %>% select(starts_with("WindOffshore")) %>% apply(1, sum, na.rm=TRUE)
-  res$WindOnshore_Generation_Forecast_Netzregelverbund <- res %>% select(starts_with("WindOnshore")) %>% apply(1, sum, na.rm=TRUE)
-  res$Solar_Generation_Forecast_Netzregelverbund <- res %>% select(starts_with("Solar")) %>% apply(1, sum, na.rm=TRUE)
-  res$Sum_Generation_Forecast_Netzregelverbund <- res %>% select(starts_with("Sum")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Forecast_WindOffshore_Netzregelverbund <- res %>% select(starts_with("Generation_Forecast_WindOffshore")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Forecast_WindOnshore_Netzregelverbund <- res %>% select(starts_with("Generation_Forecast_WindOnshore")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Forecast_Solar_Netzregelverbund <- res %>% select(starts_with("Generation_Forecast_Solar")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Forecast_Sum_Netzregelverbund <- res %>% select(starts_with("Generation_Forecast_Sum")) %>% apply(1, sum, na.rm=TRUE)
 
 
   if(getOption("logging")) logdebug(paste("getWindSolarDayAheadGeneration - DONE"))
@@ -428,10 +438,10 @@ getWindSolarDataForTSO <- function(startDate, endDate, t){
                        na.strings  = "-",
                        colClasses = c("character", "character", "character"),
                        col.names = c("DateTime",
-                                     paste("Sum_Generation_Forecast_", t, sep = ""),
-                                     paste("Solar_Generation_Forecast_", t, sep = ""),
-                                     paste("WindOffshore_Generation_Forecast_", t, sep = ""),
-                                     paste("WindOnshore_Generation_Forecast_", t, sep = ""))
+                                     paste("Generation_Forecast_Sum_", t, sep = ""),
+                                     paste("Generation_Forecast_Solar_", t, sep = ""),
+                                     paste("Generation_Forecast_WindOffshore_", t, sep = ""),
+                                     paste("Generation_Forecast_WindOnshore_", t, sep = ""))
                        )
 
     res <- rbind(res, data)
@@ -525,46 +535,46 @@ getActualGeneration <- function(startDate, endDate) {
   res <- as.data.frame(res)
 
   # Add the sumed loads for the Netzregelverbund
-  res$Biomass_Aggregated_Netzregelverbund <- res %>% select(starts_with("Biomass_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Biomass_Aggregated_Netzregelverbund <- res %>% select(starts_with("Biomass_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilBrown_Aggregated_Netzregelverbund <- res %>% select(starts_with("FossilBrown_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilBrown_Consumption_Netzregelverbund <- res %>% select(starts_with("FossilBrown_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilCoalGas_Aggregated_Netzregelverbund <- res %>% select(starts_with("FossilCoalGas_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilCoalGas_Consumption_Netzregelverbund <- res %>% select(starts_with("FossilCoalGas_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilGas_Aggregated_Netzregelverbund <- res %>% select(starts_with("FossilGas_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilGas_Consumption_Netzregelverbund <- res %>% select(starts_with("FossilGas_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilHardCoal_Aggregated_Netzregelverbund <- res %>% select(starts_with("FossilHardCoal_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilHardCoal_Consumption_Netzregelverbund <- res %>% select(starts_with("FossilHardCoal_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilOil_Aggregated_Netzregelverbund <- res %>% select(starts_with("FossilOil_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilOil_Consumption_Netzregelverbund <- res %>% select(starts_with("FossilOil_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilOilShale_Aggregated_Netzregelverbund <- res %>% select(starts_with("FossilOilShale_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilOilShale_Consumption_Netzregelverbund <- res %>% select(starts_with("FossilOilShale_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilPeat_Aggregated_Netzregelverbund <- res %>% select(starts_with("FossilPeat_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$FossilPeat_Consumption_Netzregelverbund <- res %>% select(starts_with("FossilPeat_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Geothermal_Aggregated_Netzregelverbund <- res %>% select(starts_with("Geothermal_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Geothermal_Consumption_Netzregelverbund <- res %>% select(starts_with("Geothermal_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$HydroPumpedStorage_Aggregated_Netzregelverbund <- res %>% select(starts_with("HydroPumpedStorage_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$HydroPumpedStorage_Consumption_Netzregelverbund <- res %>% select(starts_with("HydroPumpedStorage_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$HydroRiverPoundage_Aggregated_Netzregelverbund <- res %>% select(starts_with("HydroRiverPoundage_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$HydroRiverPoundage_Consumption_Netzregelverbund <- res %>% select(starts_with("HydroRiverPoundage_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$WaterReservoir_Aggregated_Netzregelverbund <- res %>% select(starts_with("WaterReservoir_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$WaterReservoir_Consumption_Netzregelverbund <- res %>% select(starts_with("WaterReservoir_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Nuclear_Aggregated_Netzregelverbund <- res %>% select(starts_with("Nuclear_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Nuclear_Consumption_Netzregelverbund <- res %>% select(starts_with("Nuclear_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Other_Aggregated_Netzregelverbund <- res %>% select(starts_with("Other_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Other_Consumption_Netzregelverbund <- res %>% select(starts_with("Other_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Other_RenewableAggregated_Netzregelverbund <- res %>% select(starts_with("OtherRenewable_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Other_RenewableConsumption_Netzregelverbund <- res %>% select(starts_with("OtherRenewable_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Solar_Aggregated_Netzregelverbund <- res %>% select(starts_with("Solar_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Solar_Consumption_Netzregelverbund <- res %>% select(starts_with("Solar_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Waste_Aggregated_Netzregelverbund <- res %>% select(starts_with("Waste_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Waste_Consumption_Netzregelverbund <- res %>% select(starts_with("Waste_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$WindOffshore_Aggregated_Netzregelverbund <- res %>% select(starts_with("WindOffshore_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$WindOffshore_Consumption_Netzregelverbund <- res %>% select(starts_with("WindOffshore_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$WindOnshore_Aggregated_Netzregelverbund <- res %>% select(starts_with("WindOnshore_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$WindOnshore_Consumption_Netzregelverbund <- res %>% select(starts_with("WindOnshore_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Sum_Aggregated_Netzregelverbund <- res %>% select(starts_with("Sum_Aggregated_")) %>% apply(1, sum, na.rm=TRUE)
-  res$Sum_Consumption_Netzregelverbund <- res %>% select(starts_with("Sum_Consumption_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_Biomass_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_Biomass_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_Biomass_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_Biomass_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_FossilBrown_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_FossilBrown_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_FossilBrown_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_FossilBrown_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_FossilCoalGas_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_FossilCoalGas_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_FossilCoalGas_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_FossilCoalGas_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_FossilGas_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_FossilGas_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_FossilGas_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_FossilGas_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_FossilHardCoal_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_FossilHardCoal_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_FossilHardCoal_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_FossilHardCoal_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_FossilOil_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_FossilOil_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_FossilOil_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_FossilOil__")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_FossilOilShale_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_FossilOilShale_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_FossilOilShale_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_FossilOilShale_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_FossilPeat_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_FossilPeat_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_FossilPeat_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_FossilPeat_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_Geothermal_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_Geothermal_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_Geothermal_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_Geothermal_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_HydroPumpedStorage_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_HydroPumpedStorage_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_HydroPumpedStorage_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_HydroPumpedStorage_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_HydroRiverPoundage_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_HydroRiverPoundage_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_HydroRiverPoundage_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_HydroRiverPoundage_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_WaterReservoir_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_WaterReservoir_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_WaterReservoir_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_WaterReservoir_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_Nuclear_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_Nuclear_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_Nuclear_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_Nuclear_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_Other_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_Other_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_Other_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_Other_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_Other_Renewable_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_OtherRenewable_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_Other_Renewable_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_OtherRenewable_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_Solar_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_Solar_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_Solar_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_Solar_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_Waste_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_Waste_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_Waste_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_Waste_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_WindOffshore_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_WindOffshore_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_WindOffshore_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_WindOffshore_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_WindOnshore_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_WindOnshore_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_WindOnshore_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_WindOnshore_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Generation_Actual_Sum_Netzregelverbund <- res %>% select(starts_with("Generation_Actual_Sum_")) %>% apply(1, sum, na.rm=TRUE)
+  res$Consumption_Actual_Sum_Netzregelverbund <- res %>% select(starts_with("Consumption_Actual_Sum_")) %>% apply(1, sum, na.rm=TRUE)
 
 
   if(getOption("logging")) logdebug(paste("getActualGeneration - DONE"))
@@ -730,46 +740,46 @@ getGenerationDataForTSO <- function(startDate, endDate, t){
                        na.strings  = c("-", "", "n/e"),
                        colClasses = c("character", "character"),
                        col.names = c("Area", "DateTime",
-                                     paste("Biomass_Aggregated_", t, sep = ""),
-                                     paste("Biomass_Consumption_", t, sep = ""),
-                                     paste("FossilBrown_Aggregated_", t, sep = ""),
-                                     paste("FossilBrown_Consumption_", t, sep = ""),
-                                     paste("FossilCoalGas_Aggregated_", t, sep = ""),
-                                     paste("FossilCoalGas_Consumption_", t, sep = ""),
-                                     paste("FossilGas_Aggregated_", t, sep = ""),
-                                     paste("FossilGas_Consumption_", t, sep = ""),
-                                     paste("FossilHardCoal_Aggregated_", t, sep = ""),
-                                     paste("FossilHardCoal_Consumption_", t, sep = ""),
-                                     paste("FossilOil_Aggregated_", t, sep = ""),
-                                     paste("FossilOil_Consumption_", t, sep = ""),
-                                     paste("FossilOilShale_Aggregated_", t, sep = ""),
-                                     paste("FossilOilShale_Consumption_", t, sep = ""),
-                                     paste("FossilPeat_Aggregated_", t, sep = ""),
-                                     paste("FossilPeat_Consumption_", t, sep = ""),
-                                     paste("Geothermal_Aggregated_", t, sep = ""),
-                                     paste("Geothermal_Consumption_", t, sep = ""),
-                                     paste("HydroPumpedStorage_Aggregated_", t, sep = ""),
-                                     paste("HydroPumpedStorage_Consumption_", t, sep = ""),
-                                     paste("HydroRiverPoundage_Aggregated_", t, sep = ""),
-                                     paste("HydroRiverPoundage_Consumption_", t, sep = ""),
-                                     paste("WaterReservoir_Aggregated_", t, sep = ""),
-                                     paste("WaterReservoir_Consumption_", t, sep = ""),
-                                     paste("Marine_Aggregated_", t, sep = ""),
-                                     paste("Marine_Consumption_", t, sep = ""),
-                                     paste("Nuclear_Aggregated_", t, sep = ""),
-                                     paste("Nuclear_Consumption_", t, sep = ""),
-                                     paste("Other_Aggregated_", t, sep = ""),
-                                     paste("Other_Consumption_", t, sep = ""),
-                                     paste("OtherRenewable_Aggregated_", t, sep = ""),
-                                     paste("OtherRenewable_Consumption_", t, sep = ""),
-                                     paste("Solar_Aggregated_", t, sep = ""),
-                                     paste("Solar_Consumption_", t, sep = ""),
-                                     paste("Waste_Aggregated_", t, sep = ""),
-                                     paste("Waste_Consumption_", t, sep = ""),
-                                     paste("WindOffshore_Aggregated_", t, sep = ""),
-                                     paste("WindOffshore_Consumption_", t, sep = ""),
-                                     paste("WindOnshore_Aggregated_", t, sep = ""),
-                                     paste("WindOnshore_Consumption_", t, sep = "")
+                                     paste("Generation_Actual_Biomass_", t, sep = ""),
+                                     paste("Consumption_Actual_Biomass_", t, sep = ""),
+                                     paste("Generation_Actual_FossilBrown_", t, sep = ""),
+                                     paste("Consumption_Actual_FossilBrown_", t, sep = ""),
+                                     paste("Generation_Actual_FossilCoalGas_", t, sep = ""),
+                                     paste("Consumption_Actual_FossilCoalGas_", t, sep = ""),
+                                     paste("Generation_Actual_FossilGas_", t, sep = ""),
+                                     paste("Consumption_Actual_FossilGas_", t, sep = ""),
+                                     paste("Generation_Actual_FossilHardCoal_", t, sep = ""),
+                                     paste("Consumption_Actual_FossilHardCoal_", t, sep = ""),
+                                     paste("Generation_Actual_FossilOil_", t, sep = ""),
+                                     paste("Consumption_Actual_FossilOil_", t, sep = ""),
+                                     paste("Generation_Actual_FossilOilShale_", t, sep = ""),
+                                     paste("Consumption_Actual_FossilOilShale_", t, sep = ""),
+                                     paste("Generation_Actual_FossilPeat_", t, sep = ""),
+                                     paste("Consumption_Actual_FossilPeat_", t, sep = ""),
+                                     paste("Generation_Actual_Geothermal_", t, sep = ""),
+                                     paste("Consumption_Actual_Geothermal_", t, sep = ""),
+                                     paste("Generation_Actual_HydroPumpedStorage_", t, sep = ""),
+                                     paste("Consumption_Actual_HydroPumpedStorage_", t, sep = ""),
+                                     paste("Generation_Actual_HydroRiverPoundage_", t, sep = ""),
+                                     paste("Consumption_Actual_HydroRiverPoundage_", t, sep = ""),
+                                     paste("Generation_Actual_WaterReservoir_", t, sep = ""),
+                                     paste("Consumption_Actual_WaterReservoir_", t, sep = ""),
+                                     paste("Generation_Actual_Marine_", t, sep = ""),
+                                     paste("Consumption_Actual_Marine_", t, sep = ""),
+                                     paste("Generation_Actual_Nuclear_", t, sep = ""),
+                                     paste("Consumption_Actual_Nuclear_", t, sep = ""),
+                                     paste("Generation_Actual_Other_", t, sep = ""),
+                                     paste("Consumption_Actual_Other_", t, sep = ""),
+                                     paste("Generation_Actual_OtherRenewable_", t, sep = ""),
+                                     paste("Consumption_Actual_OtherRenewable_", t, sep = ""),
+                                     paste("Generation_Actual_Solar_", t, sep = ""),
+                                     paste("Consumption_Actual_Solar_", t, sep = ""),
+                                     paste("Generation_Actual_Waste_", t, sep = ""),
+                                     paste("Consumption_Actual_Waste_", t, sep = ""),
+                                     paste("Generation_Actual_WindOffshore_", t, sep = ""),
+                                     paste("Consumption_Actual_WindOffshore_", t, sep = ""),
+                                     paste("Generation_Actual_WindOnshore_", t, sep = ""),
+                                     paste("Consumption_Actual_WindOnshore_", t, sep = "")
                        ))
 
     res <- rbind(res, data)
@@ -794,8 +804,8 @@ getGenerationDataForTSO <- function(startDate, endDate, t){
   res <- res %>% filter(DateTime >= as.POSIXct(paste(startDate, "00:00:00", sep=""), tz = "Europe/Berlin") & DateTime <= as.POSIXct(paste(endDate, "23:59:59", sep=""), tz = "Europe/Berlin"))
 
   # Add Actual Generation and Consumption sum for each TSO
-  res[ , paste("Sum_Aggregated_", t, sep="")] <- res %>% select(contains("Aggregated")) %>% apply(1, sum, na.rm=TRUE)
-  res[ , paste("Sum_Consumption_", t, sep="")] <- res %>% select(contains("Consumption")) %>% apply(1, sum, na.rm=TRUE)
+  res[ , paste("Generation_Actual_Sum_", t, sep="")] <- res %>% select(contains("Generation")) %>% apply(1, sum, na.rm=TRUE)
+  res[ , paste("Consumption_Actual_Sum_", t, sep="")] <- res %>% select(contains("Consumption")) %>% apply(1, sum, na.rm=TRUE)
 
 
 
