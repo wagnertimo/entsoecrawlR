@@ -103,6 +103,14 @@ getLoadDayAheadVsActual <- function(startDate, endDate) {
   )
 
 
+  # Get rid of the additional 2 hour in the week of the DST+1 --> rule: if datetime hour == 2 and NA in the values of Prices and Volume --> delete row
+  res = res[!(hour(res$DateTime) == 2 & is.na(res$Load_Forecast_Sum_50Hz) & is.na(res$Load_Actual_Sum_50Hz) &
+                is.na(res$Load_Forecast_Sum_Amprion) & is.na(res$Load_Actual_Sum_Amprion) &
+              is.na(res$Load_Forecast_Sum_TenneT) & is.na(res$Load_Actual_Sum_TenneT)) , ]
+  # Get rid of NA columns when there is DST-1
+  res = res[!(hour(res$DateTime) == 1 & is.na(res$Load_Forecast_Sum_50Hz) & is.na(res$Load_Actual_Sum_50Hz) &
+                is.na(res$Load_Forecast_Sum_Amprion) & is.na(res$Load_Actual_Sum_Amprion) &
+                is.na(res$Load_Forecast_Sum_TenneT) & is.na(res$Load_Actual_Sum_TenneT)) , ]
 
   if(getOption("logging")) logdebug(paste("getLoadDayAheadVsActual - DONE"))
 

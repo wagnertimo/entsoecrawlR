@@ -53,6 +53,20 @@ head(data3)
 
 
 
+sdate2 = "2015-10-24" # "2015-03-28"
+edate2 = "2015-10-25" # "2015-03-29"
+
+sdate = "2015-03-28"
+edate = "2015-03-29"
+
+d <- getLoadDayAheadVsActual(sdate, edate)
+
+d2 <- getLoadDayAheadVsActual(sdate2, edate2)
+
+
+
+
+
 
 
 
