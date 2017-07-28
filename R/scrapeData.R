@@ -185,7 +185,7 @@ getLoadDataForTSO <- function(startDate, endDate, t){
 
   # Once logged in --> get the data
   # Get the years of the time period --> download by years and then subset
-  dateArray = paste(seq(year(as.Date(startDate)), year(as.Date(endDate)), by = 1), "-01-01", sep = "")
+  dateArray = paste(seq(year(as.Date(startDate, tz = "Europe/Berlin")), year(as.Date(endDate, tz = "Europe/Berlin")), by = 1), "-01-01", sep = "")
 
   # for each year retrieve the data
   for(i in 1:length(dateArray)) {
@@ -196,7 +196,7 @@ getLoadDataForTSO <- function(startDate, endDate, t){
     # Date Code: e.g. "12.07.2017+00:00|CET|DAY"
     # "%d.%m.%Y" + "+00:00|CET|DAY" --> this suffix stays the same
     #
-    date = paste(format(as.Date(dateArray[i]), "%d.%m.%Y"), "+00:00|CET|DAY", sep = "")
+    date = paste(format(as.Date(dateArray[i], tz = "Europe/Berlin"), "%d.%m.%Y"), "+00:00|CET|DAY", sep = "")
 
 
     # https://transparency.entsoe.eu/load-domain/r2/totalLoadR2/export?name=&defaultValue=false&viewType=TABLE&areaType=CTA&atch=false&dateTime.dateTime=12.07.2017+00:00|CET|DAY&biddingZone.values=CTY|10Y1001A1001A83F!CTA|10YDE-ENBW-----N&dateTime.timezone=CET_CEST&dateTime.timezone_input=CET+(UTC+1)+/+CEST+(UTC+2)&dataItem=ALL&timeRange=YEAR&exportType=CSV
@@ -398,7 +398,7 @@ getWindSolarDataForTSO <- function(startDate, endDate, t){
 
   # Once logged in --> get the data
   # Get the years of the time period --> download by years and then subset
-  dateArray = paste(seq(year(as.Date(startDate)), year(as.Date(endDate)), by = 1), "-01-01", sep = "")
+  dateArray = paste(seq(year(as.Date(startDate, tz = "Europe/Berlin")), year(as.Date(endDate, tz = "Europe/Berlin")), by = 1), "-01-01", sep = "")
 
   # for each year retrieve the data
   for(i in 1:length(dateArray)) {
@@ -409,7 +409,7 @@ getWindSolarDataForTSO <- function(startDate, endDate, t){
     # Date Code: e.g. "12.07.2017+00:00|CET|DAYTIMERANGE"
     # "%d.%m.%Y" + "+00:00|CET|DAYTIMERANGE" --> this suffix stays the same
     #
-    date = paste(format(as.Date(dateArray[i]), "%d.%m.%Y"), "+00:00|CET|DAYTIMERANGE", sep = "")
+    date = paste(format(as.Date(dateArray[i], tz = "Europe/Berlin"), "%d.%m.%Y"), "+00:00|CET|DAYTIMERANGE", sep = "")
 
 
     # https://transparency.entsoe.eu/generation/r2/dayAheadGenerationForecastWindAndSolar/export?name=&defaultValue=false&viewType=TABLE&areaType=CTA&atch=false&datepicker-day-offset-select-dv-date-from_input=D&dateTime.dateTime=14.07.2017+00:00|CET|DAYTIMERANGE&dateTime.endDateTime=14.07.2017+00:00|CET|DAYTIMERANGE&area.values=CTY|10Y1001A1001A83F!CTA|10YDE-VE-------2&productionType.values=B16&productionType.values=B18&productionType.values=B19&dateTime.timezone=CET_CEST&dateTime.timezone_input=CET+(UTC+1)+/+CEST+(UTC+2)&dataItem=ALL&timeRange=YEAR&exportType=CSV
@@ -684,7 +684,7 @@ getGenerationDataForTSO <- function(startDate, endDate, t){
 
   # Once logged in --> get the data
   # Get the years of the time period --> download by years and then subset
-  dateArray = paste(seq(year(as.Date(startDate)), year(as.Date(endDate)), by = 1), "-01-01", sep = "")
+  dateArray = paste(seq(year(as.Date(startDate, tz = "Europe/Berlin")), year(as.Date(endDate, tz = "Europe/Berlin")), by = 1), "-01-01", sep = "")
 
   # for each year retrieve the data
   for(i in 1:length(dateArray)) {
@@ -695,7 +695,7 @@ getGenerationDataForTSO <- function(startDate, endDate, t){
     # Date Code: e.g. "12.07.2017+00:00|CET|DAYTIMERANGE"
     # "%d.%m.%Y" + "+00:00|CET|DAYTIMERANGE" --> this suffix stays the same
     #
-    date = paste(format(as.Date(dateArray[i]), "%d.%m.%Y"), "+00:00|CET|DAYTIMERANGE", sep = "")
+    date = paste(format(as.Date(dateArray[i], tz = "Europe/Berlin"), "%d.%m.%Y"), "+00:00|CET|DAYTIMERANGE", sep = "")
 
     # https://transparency.entsoe.eu/generation/r2/actualGenerationPerProductionType/export?name=&defaultValue=false&viewType=TABLE&areaType=CTA&atch=false&datepicker-day-offset-select-dv-date-from_input=D&dateTime.dateTime=14.07.2017+00:00|CET|DAYTIMERANGE&dateTime.endDateTime=14.07.2017+00:00|CET|DAYTIMERANGE&area.values=CTY|10Y1001A1001A83F!CTA|10YDE-VE-------2&productionType.values=B01&productionType.values=B02&productionType.values=B03&productionType.values=B04&productionType.values=B05&productionType.values=B06&productionType.values=B07&productionType.values=B08&productionType.values=B09&productionType.values=B10&productionType.values=B11&productionType.values=B12&productionType.values=B13&productionType.values=B14&productionType.values=B20&productionType.values=B15&productionType.values=B16&productionType.values=B17&productionType.values=B18&productionType.values=B19&dateTime.timezone=CET_CEST&dateTime.timezone_input=CET+(UTC+1)+/+CEST+(UTC+2)&dataItem=ALL&timeRange=YEAR&exportType=CSV
     url = 'https://transparency.entsoe.eu/generation/r2/actualGenerationPerProductionType/export?';
@@ -971,7 +971,7 @@ getGenerationForecastDataForTSO <- function(startDate, endDate, t){
 
   # Once logged in --> get the data
   # Get the years of the time period --> download by years and then subset
-  dateArray = paste(seq(year(as.Date(startDate)), year(as.Date(endDate)), by = 1), "-01-01", sep = "")
+  dateArray = paste(seq(year(as.Date(startDate, tz = "Europe/Berlin")), year(as.Date(endDate, tz = "Europe/Berlin")), by = 1), "-01-01", sep = "")
 
   # for each year retrieve the data
   for(i in 1:length(dateArray)) {
@@ -982,7 +982,7 @@ getGenerationForecastDataForTSO <- function(startDate, endDate, t){
     # Date Code: e.g. "12.07.2017+00:00|CET|DAYTIMERANGE"
     # "%d.%m.%Y" + "+00:00|CET|DAYTIMERANGE" --> this suffix stays the same
     #
-    date = paste(format(as.Date(dateArray[i]), "%d.%m.%Y"), "+00:00|CET|DAYTIMERANGE", sep = "")
+    date = paste(format(as.Date(dateArray[i], tz = "Europe/Berlin"), "%d.%m.%Y"), "+00:00|CET|DAYTIMERANGE", sep = "")
 
     # https://transparency.entsoe.eu/generation/r2/dayAheadAggregatedGeneration/export?name=&defaultValue=false&viewType=TABLE&areaType=CTA&atch=false&datepicker-day-offset-select-dv-date-from_input=D&dateTime.dateTime=01.01.2017+00:00|CET|DAYTIMERANGE&dateTime.endDateTime=01.01.2017+00:00|CET|DAYTIMERANGE&area.values=CTY|10Y1001A1001A83F!CTA|10YDE-VE-------2&dateTime.timezone=CET_CEST&dateTime.timezone_input=CET+(UTC+1)+/+CEST+(UTC+2)&dataItem=ALL&timeRange=YEAR&exportType=CSV
     url = 'https://transparency.entsoe.eu/generation/r2/dayAheadAggregatedGeneration/export?';
